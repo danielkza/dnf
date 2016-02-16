@@ -31,7 +31,10 @@ import dnf.exceptions
 import dnf.rpm.miscutils
 import dnf.i18n
 import functools
+import logging
 
+
+logger = logging.getLogger("dnf")
 
 #  Cut over for when we should just give up and load everything.
 #  The main problem here is not so much SQLite dying (although that happens
@@ -592,7 +595,9 @@ class YumMergedHistoryTransaction(YumHistoryTransaction):
                     # all goood state changes.
                     good_states = ('Install', 'True-Install', 'Dep-Install',
                                    'Obsoleting')
-                    assert npkg.state not in good_states
+                    if npkg.state not in good_states:
+                        msg = _("Warning: inconsistent state transition in history transaction: %s => %s")
+                        logger.warning(msg, fpkg.state, npkg.state)
 
                 elif fpkg.state in ('Install', 'True-Install', 'Dep-Install'):
                     if False: pass
